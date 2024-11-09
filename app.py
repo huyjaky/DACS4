@@ -75,9 +75,6 @@ class VideoProcessor:
 
 # NOTE: detect id vehicles
 def model_prediction(img):
-    license_numbers = 0
-    results = {}
-    licenses_texts = []
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     object_detections = coco_model(img)[0]
@@ -122,7 +119,7 @@ def model_prediction(img):
     
     else : 
         img_wth_box = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        return [img_wth_box]
+        return {'License_plate_crop': img_wth_box, 'License_id': None}
     
 
 def change_state_uploader() :
@@ -186,56 +183,7 @@ with body :
 
         if col5.button("Apply Detection"):
             results = model_prediction(image)
-
-            if results['License_plate_crop']:
-                prediction, texts, license_plate_crop = results[0], results[1], results[2]
-
-                texts = [i for i in texts if i is not None]
                 
-                if len(texts) == 1 and len(license_plate_crop) :
-                    _, col3, _ = st.columns([0.4,1,0.2])
-                    col3.header("Detection Results ✅:")
-
-                    _, col4, _ = st.columns([0.1,1,0.1])
-                    col4.image(prediction)
-
-                    _, col9, _ = st.columns([0.4,1,0.2])
-                    col9.header("License Cropped ✅:")
-
-                    _, col10, _ = st.columns([0.3,1,0.1])
-                    col10.image(license_plate_crop[0], width=350)
-
-                    _, col11, _ = st.columns([0.45,1,0.55])
-                    col11.success(f"License Number: {texts[0]}")
-
-                    df = pd.read_csv(f"./csv_detections/detection_results.csv")
-                    st.dataframe(df)
-                elif len(texts) > 1 and len(license_plate_crop) > 1  :
-                    _, col3, _ = st.columns([0.4,1,0.2])
-                    col3.header("Detection Results ✅:")
-
-                    _, col4, _ = st.columns([0.1,1,0.1])
-                    col4.image(prediction)
-
-                    _, col9, _ = st.columns([0.4,1,0.2])
-                    col9.header("License Cropped ✅:")
-
-                    _, col10, _ = st.columns([0.3,1,0.1])
-
-                    _, col11, _ = st.columns([0.45,1,0.55])
-
-                    col7, col8 = st.columns([1,1])
-                    for i in range(0, len(license_plate_crop)) :
-                        col10.image(license_plate_crop[i], width=350)
-                        col11.success(f"License Number {i}: {texts[i]}")
-
-            else :
-                prediction = results[0]
-                _, col3, _ = st.columns([0.4,1,0.2])
-                col3.header("Detection Results ✅:")
-
-                _, col4, _ = st.columns([0.3,1,0.1])
-                col4.image(prediction)
 
 
 
