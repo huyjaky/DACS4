@@ -4,13 +4,16 @@ from PIL import Image
 from ultralytics import YOLO
 import cv2
 from util import set_background
-from manga_ocr import MangaOcr
+from paddleocr import PaddleOCR
 
 set_background("./imgs/background.png")
 
 folder_path = "./licenses_plates_imgs_detected/"
 LICENSE_MODEL_DETECTION_DIR = "./models/results/best.onnx"
 COCO_MODEL_DIR = "./models/results/yolo11n.pt"
+
+# Also switch the language by modifying the lang parameter
+ocr = PaddleOCR(lang="en") # The model file will be downloaded automatically when executed for the first time
 
 vehicles = [2]
 
@@ -19,7 +22,6 @@ body = st.container()
 
 coco_model = YOLO(COCO_MODEL_DIR)
 license_plate_detector = YOLO(LICENSE_MODEL_DETECTION_DIR)
-mocr = MangaOcr()
 
 
 threshold = 0.15
@@ -52,9 +54,15 @@ def model_prediction(img):
                 output_path, cv2.cvtColor(license_plate_crop_rgb, cv2.COLOR_RGB2BGR)
             )
 
+        img_path ='./license_plate_crop.jpg'
+        result = ocr.ocr(img_path)
+        text = ''
+        for line in result[0]:
+            text += line[1][0]
+
         return {
             "image": "./license_plate_crop.jpg",
-            "text": mocr(Image.open("./license_plate_crop.jpg")),
+            "text": text
         }
 
     else:
